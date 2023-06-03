@@ -280,7 +280,7 @@ def update_dynamics_case_3(rad,L,angvel,Xp,Yp,n):
 
         def part2b(n):
             f=sum(angvel[:n-1])*L[n-1]*np.cos(sum(rad[:n]))
-            return(-1*f)
+            return(f)
 
 
         return(part1b(n)+part2b(n))
@@ -288,7 +288,7 @@ def update_dynamics_case_3(rad,L,angvel,Xp,Yp,n):
     if n==1:
       #If n==1 (base link)
       f=np.array([0,0,0])
-      g=np.array([-L[n-1]*np.sin(rad[n-1]),L[n-1]*np.cos(rad[n-1]),1])
+      g=np.array([-L[0]*np.sin(rad[0]),L[0]*np.cos(rad[0]),1])
 
     else:
       #If n>=2 (all other links)
@@ -363,6 +363,10 @@ def plot(xp,yp,dp,n,rad,L):
     bgr = cv2.cvtColor(f_arr, cv2.COLOR_RGBA2BGR)
     out.write(bgr)    
     # Show the plot
+
+
+
+
 
 fig, ax = plt.subplots()
 for i in range(steps):
