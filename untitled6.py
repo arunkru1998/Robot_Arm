@@ -14,7 +14,70 @@ Todo:
 
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
 
+
+
+###Begining of code
+
+#initialisation
+#initial angles
+theta1 = 2.865
+theta2 = 2.865
+theta3 = 2.865
+ang=[theta1,theta2,theta3]
+rad=np.deg2rad(ang)
+n=3
+# n - number of the links
+
+
+#initial angvel
+theta_1_dot=0.1
+theta_2_dot=0.2
+theta_3_dot=0.3
+angvel=[theta_1_dot,theta_2_dot,theta_3_dot]
+ref=angvel
+# Joint lengths
+L1 = 1
+L2 = 1
+L3 = 1
+L=[L1,L2,L3]
+
+# robot arm half-width
+l1=0.2
+l2=0.2
+l3=0.2
+l=[l1,l2,l3]
+
+#position of the obstacle
+x_ob=1.0
+y_ob=1.8
+
+
+
+#CBF constants
+
+k=[0.01,0.01,0.01]
+c=[1,1,1]
+
+
+
+end_time=10
+dt=0.1
+steps=int(end_time/dt)
+joint_pos=[]
+obs_perpen_pose=[]
+trackerref=[ref]
+trackeru=[[0,0,0]]
+trackervel=[np.asarray(ref)+np.asarray(trackeru[0])]
+distance=[]
+
+frame=(500,500)
+
+fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+out = cv2.VideoWriter("video.avi", fourcc, 30, frame) 
+
+# Functions
 # Update angle position and angular velocity
 def update_angle(angvel,rad,dt):
   newrad=[]
@@ -272,82 +335,36 @@ def control_assist(rad,angvel,l,x_ob,y_ob,dp,f,g,k,c,n):
 
     return(u_n)
 
+def figure_to_array(fig):
+    fig.canvas.draw()
+    return np.array(fig.canvas.renderer._renderer)
+
 def plot(xp,yp,dp,n,rad,L):
 # Plot the robotic arm
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(frame[0]/100, frame[1]/100))
     c=['red','green','blue']
     x4 = xp[n-1] + L[n-1] * np.cos(sum(rad))
     y4 = yp[n-1] + L[n-1] * np.sin(sum(rad))
     xp.append(x4)
     yp.append(y4)
-    ax.scatter(x_ob,y_ob)
+    plt.scatter(x_ob,y_ob)
     for i in range(n):
-        ax.plot([xp[i], xp[i+1]], [yp[i], yp[i+1]], color=c[i], linewidth=2)
-        ax.scatter(dp[i][0],dp[i][1], color=c[i])
+        plt.plot([xp[i], xp[i+1]], [yp[i], yp[i+1]], color=c[i], linewidth=2)
+        plt.scatter(dp[i][0],dp[i][1], color=c[i])
 
     
 
     # Set axis limits and aspect ratio
-    ax.set_xlim([-5.0, 5.0])
-    ax.set_ylim([-5.0, 5.0])
-    ax.set_aspect('equal')
-
+    plt.xlim([-5.0, 5.0])
+    plt.ylim([-5.0, 5.0])
+    plt.gca().set_aspect('equal', adjustable='box')
+    f_arr = figure_to_array(fig)
+    f_arr = cv2.resize(f_arr,frame)
+    bgr = cv2.cvtColor(f_arr, cv2.COLOR_RGBA2BGR)
+    out.write(bgr)    
     # Show the plot
 
-###Begining of code
-
-#initialisation
-#initial angles
-theta1 = 2.865
-theta2 = 2.865
-theta3 = 2.865
-ang=[theta1,theta2,theta3]
-rad=np.deg2rad(ang)
-n=3
-# n - number of the links
-
-
-#initial angvel
-theta_1_dot=0.1
-theta_2_dot=0.2
-theta_3_dot=0.3
-angvel=[theta_1_dot,theta_2_dot,theta_3_dot]
-ref=angvel
-# Joint lengths
-L1 = 1
-L2 = 1
-L3 = 1
-L=[L1,L2,L3]
-
-# robot arm half-width
-l1=0.2
-l2=0.2
-l3=0.2
-l=[l1,l2,l3]
-
-#position of the obstacle
-x_ob=1.0
-y_ob=1.8
-
-
-
-#CBF constants
-
-k=[0.01,0.01,0.01]
-c=[1,1,1]
-
-
-
-end_time=10
-dt=0.05
-steps=int(end_time/dt)
-joint_pos=[]
-obs_perpen_pose=[]
-trackerref=[ref]
-trackeru=[[0,0,0]]
-trackervel=[np.asarray(ref)+np.asarray(trackeru[0])]
-distance=[]
-
+fig, ax = plt.subplots()
 for i in range(steps):
     xp,yp,Xp,Yp,dp,L_D=update_pos(rad,L,x_ob,y_ob)
     dsquare=[]
@@ -387,15 +404,18 @@ for i in range(steps):
     trackerref.append(ref)
     trackervel.append(np.asarray(ref)+np.asarray(u))
     u=np.asarray(u)
-    plot(xp,yp,dp,n,rad,L)
-    plt.show()
+    # Generate the new plot
+    plot(xp, yp, dp, n, rad, L)  # Call your plot function here
     rad=update_angle(angvel,rad,dt)
     angvel=update_vel(ref,u)
 
-        # f_X_D_1,f_X_D_2,f_X_D_3,g_X_D_1,g_X_D_2,g_X_D_3=update_dynamics_case_2(rad,L,angvel,Xp,Yp)
+       # f_X_D_1,f_X_D_2,f_X_D_3,g_X_D_1,g_X_D_2,g_X_D_3=update_dynamics_case_2(rad,L,angvel,Xp,Yp)
 
         # f_X_D_1,f_X_D_2,f_X_D_3,g_X_D_1,g_X_D_2,g_X_D_3=update_dynamics_case_3(rad,L,angvel,Xp,Yp)
             # f_X_D_1,f_X_D_2,f_X_D_3,g_X_D_1,g_X_D_2,g_X_D_3=update_dynamics_case_1(rad,L,angvel)
+
+# Release the video writer and close any open windows
+out.release()
 
 distance=np.asarray(distance)
 trackervel=np.asarray(trackervel)
