@@ -239,7 +239,7 @@ def update_dynamics_case_2(rad,L,angvel,Xp,Yp,n):
     else:
       #If n>=2 (all other links)
       f=np.array([alpha1_n(n),beta1_n(n),sum(angvel[:n-1])])
-      g=np.array([Yp[n-1]*np.cos(2*(sum(rad[:n])))-Xp[n-1]*np.sin(2*(sum(rad[:n]))),Xp[n-1]*np.cos(2*(sum(rad[:n])))-Yp[n-1]*np.sin(2*(sum(rad[:n]))),1])
+      g=np.array([Yp[n-1]*np.cos(2*(sum(rad[:n])))-Xp[n-1]*np.sin(2*(sum(rad[:n]))),Xp[n-1]*np.cos(2*(sum(rad[:n])))+Yp[n-1]*np.sin(2*(sum(rad[:n]))),1])
 
     # f_X_D_1=np.asarray([0,0,0])
     # f_X_D_2=np.asarray([alpha1_n(2),beta1_n(2),angvel[0]])
