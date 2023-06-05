@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 # -*- coding: utf-8 -*-
 """
 Created on Sat Jun  3 16:30:17 2023
@@ -21,7 +19,6 @@ Todo:
 
 
 
->>>>>>> ae4235376a4b51731972c57b80ca9894cc4a10ec
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
@@ -42,7 +39,7 @@ n=3
 
 
 #initial angvel
-theta_1_dot=0.1
+theta_1_dot=1
 theta_2_dot=0
 theta_3_dot=0
 angvel=[theta_1_dot,theta_2_dot,theta_3_dot]
@@ -60,24 +57,19 @@ l3=0.1
 l=[l1,l2,l3]
 
 #position of the obstacle
-x_ob=0.85
+x_ob=0.8
 y_ob=0.85
 
 
 
 #CBF constants
 
-<<<<<<< HEAD
-k=[0.1,0.1,0.1]
-c=[0.01,0.01,0.01]
-=======
 k=[1,1,1]
 c=[1,1,1]
->>>>>>> ae4235376a4b51731972c57b80ca9894cc4a10ec
 
 
 
-end_time=30
+end_time=15
 dt=0.1
 steps=int(end_time/dt)
 joint_pos=[]
@@ -314,7 +306,7 @@ def control_assist(rad,angvel,l,x_ob,y_ob,dp,f,g,k,c,n):
 
 
     if (I_n-J_n>0):
-        u_n=-((I_n-J_n)/np.linalg.norm(np.array(grad_B_n)@g))*(np.array(grad_B_n)@g)
+        u_n=-((I_n-J_n)/(np.linalg.norm(np.array(grad_B_n)@g)))*(np.array(grad_B_n)@g)
     else:
         u_n=0
 
@@ -346,7 +338,8 @@ def plot(xp,yp,dp,n,rad,L):
     f_arr = figure_to_array(fig)
     f_arr = cv2.resize(f_arr,frame)
     bgr = cv2.cvtColor(f_arr, cv2.COLOR_RGBA2BGR)
-    out.write(bgr)    
+    out.write(bgr)
+    plt.clf()    
     
 
 
@@ -375,15 +368,8 @@ for i in range(steps):
             f_,g_=update_dynamics_case_2(rad,L,angvel,Xp,Yp,j+1)
         f.append(f_)
         g.append(g_)
-<<<<<<< HEAD
 
     print([l1,l2,l3],[k[0],k[1],k[2]])
-=======
-    # l0, k0=update_dynamics_case_1(rad,L,angvel,2)    
-    # l1, k1=update_dynamics_case_2(rad,L,angvel,Xp,Yp,2)
-    # l2, k2= update_dynamics_case_3(rad,L,angvel,Xp,Yp,2)
-    
->>>>>>> ae4235376a4b51731972c57b80ca9894cc4a10ec
     f=np.asarray(f)
     g=np.asarray(g)
 
@@ -406,6 +392,8 @@ trackervel=np.asarray(trackervel)
 trackeru=np.asarray(trackeru)
 trackerref=np.asarray(trackerref)
 t=np.linspace(0,end_time,int(end_time/dt+1))
+
+
 
 plt.figure()
 plt.plot(t,trackerref[:,0],t,trackeru[:,0],t,trackervel[:,0])
@@ -430,6 +418,7 @@ plt.plot(t[:-1],distance[:,0],t[:-1],distance[:,1],t[:-1],distance[:,2])
 plt.plot([t[0] ,t[-1]],[l[0],l[2]],linestyle='dashed')
 plt.legend(['D1',"D2","D3"])
 plt.title("Distance Between Dn and Barrier point")
+
 
 
 
