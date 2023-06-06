@@ -39,9 +39,9 @@ n=3
 
 
 #initial angvel
-theta_1_dot=1
-theta_2_dot=0
-theta_3_dot=0
+theta_1_dot=0.1
+theta_2_dot=0.
+theta_3_dot=0.
 angvel=[theta_1_dot,theta_2_dot,theta_3_dot]
 ref=angvel
 # Joint lengths
@@ -57,20 +57,20 @@ l3=0.1
 l=[l1,l2,l3]
 
 #position of the obstacle
-x_ob=0.8
-y_ob=0.85
+x_ob=1
+y_ob=1.8
 
 
 
 #CBF constants
 
-k=[1,1,1]
-c=[1,1,1]
+k=[0.1,0.1,0.1]
+c=[0.1,0.1,0.1]
 
 
 
 end_time=15
-dt=0.1
+dt=0.01
 steps=int(end_time/dt)
 joint_pos=[]
 obs_perpen_pose=[]
@@ -78,6 +78,7 @@ trackerref=[ref]
 trackeru=[[0,0,0]]
 trackervel=[np.asarray(ref)+np.asarray(trackeru[0])]
 distance=[]
+B_list=[]
 
 frame=(500,500)
 
@@ -306,13 +307,13 @@ def control_assist(rad,angvel,l,x_ob,y_ob,dp,f,g,k,c,n):
 
 
     if (I_n-J_n>0):
-        u_n=-((I_n-J_n)/(np.linalg.norm(np.array(grad_B_n)@g)))*(np.array(grad_B_n)@g)
+        u_n=-((I_n-J_n)/(np.linalg.norm(np.array(grad_B_n)@g)**2))@np.transpose((np.array(grad_B_n)@g))
     else:
         u_n=0
 
     u_n=float(u_n)
 
-    return(u_n)
+    return(u_n,B_n)
 
 def figure_to_array(fig):
     fig.canvas.draw()
@@ -359,6 +360,8 @@ for i in range(steps):
     f=[]
     g=[]
     u=[]
+    B=[]
+    
     for j in range(n):
         if (L_D[j]==0):
             f_,g_=update_dynamics_case_1(rad,L,angvel,j+1)
@@ -374,8 +377,10 @@ for i in range(steps):
     g=np.asarray(g)
 
     for w in range(n):
-        u_=control_assist(rad,angvel,l,x_ob,y_ob,dp,f[w],g[w],k[w],c[w],w+1)
+        u_,B_=control_assist(rad,angvel,l,x_ob,y_ob,dp,f[w],g[w],k[w],c[w],w+1)
         u.append(u_)
+        B.append(B_)
+    B_list.append(B)
     trackeru.append(u)
     trackerref.append(ref)
     trackervel.append(np.asarray(ref)+np.asarray(u))
@@ -388,6 +393,7 @@ for i in range(steps):
 out.release()
 
 distance=np.asarray(distance)
+B_list=np.asarray(B_list)
 trackervel=np.asarray(trackervel)
 trackeru=np.asarray(trackeru)
 trackerref=np.asarray(trackerref)
@@ -418,6 +424,12 @@ plt.plot(t[:-1],distance[:,0],t[:-1],distance[:,1],t[:-1],distance[:,2])
 plt.plot([t[0] ,t[-1]],[l[0],l[2]],linestyle='dashed')
 plt.legend(['D1',"D2","D3"])
 plt.title("Distance Between Dn and Barrier point")
+
+print(B_list)
+plt.figure()
+plt.plot(t[:-1],B_list[:,0],t[:-1],B_list[:,1],t[:-1],B_list[:,2])
+plt.legend(['B1',"B2","B3"])
+plt.title("Barrier function")
 
 
 

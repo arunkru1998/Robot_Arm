@@ -41,8 +41,8 @@ n=3
 
 #initial angvel
 theta_1_dot=0.1
-theta_2_dot=0.2
-theta_3_dot=0.3
+theta_2_dot=0.
+theta_3_dot=0.
 angvel=[theta_1_dot,theta_2_dot,theta_3_dot]
 ref=angvel
 # Joint lengths
@@ -52,9 +52,9 @@ L3 = 1
 L=[L1,L2,L3]
 
 # robot arm half-width
-l1=0.1
-l2=0.1
-l3=0.1
+l1=0.25
+l2=0.25
+l3=0.25
 l=[l1,l2,l3]
 
 #position of the obstacle
@@ -65,12 +65,12 @@ y_ob=1.8
 
 #CBF constants
 
-k=[0.1,0.1,0.1]
-c=[0.1,0.1,0.1]
+k=[0.01,0.01,0.01]
+c=[0.5,0.5,0]
 
 
 
-end_time=10
+end_time=20
 dt=0.1
 steps=int(end_time/dt)
 joint_pos=[]
@@ -345,18 +345,18 @@ def plot(xp,yp,dp,n,rad,L):
     plt.cla()
     plt.clf()   
     
-
-
+xp,yp,Xp,Yp,dp,L_D=update_pos(rad,L,x_ob,y_ob)
+dsquare=[]
+for i in range(len(xp)):
+    x=x_ob-dp[i][0]
+    y=y_ob-dp[i][1]
+    d=x**2+y**2
+    dsquare.append(np.sqrt(d))
+distance.append(dsquare)
+plot(xp, yp, dp, n, rad, L)
 fig, ax = plt.subplots()
-for i in range(steps):
-    xp,yp,Xp,Yp,dp,L_D=update_pos(rad,L,x_ob,y_ob)
-    dsquare=[]
-    for i in range(len(xp)):
-        x=x_ob-dp[i][0]
-        y=y_ob-dp[i][1]
-        d=x**2+y**2
-        dsquare.append(np.sqrt(d))
-    distance.append(dsquare)
+for i in range(steps): 
+
     # xp,yp - base joint position for each link
     # Xp,Yp - Xob-Xn 
     # dp -Xd,Yd
@@ -397,8 +397,17 @@ for i in range(steps):
     trackervel.append(angvel)
     # u=np.asarray(u)
     # # Generate the new plot
-    plot(xp, yp, dp, n, rad, L)  # Call your plot function here
+      # Call your plot function here
     rad=update_angle(angvel,rad,dt)
+    xp,yp,Xp,Yp,dp,L_D=update_pos(rad,L,x_ob,y_ob)
+    dsquare=[]
+    for i in range(len(xp)):
+        x=x_ob-dp[i][0]
+        y=y_ob-dp[i][1]
+        d=x**2+y**2
+        dsquare.append(np.sqrt(d))
+    distance.append(dsquare)
+    plot(xp, yp, dp, n, rad, L)
     # angvel=update_vel(ref,u)
 
 out.release()
