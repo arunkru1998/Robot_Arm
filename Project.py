@@ -307,7 +307,7 @@ def control_assist(rad,angvel,l,x_ob,y_ob,dp,f,g,k,c,n):
 
 
     if (I_n-J_n>0):
-        u_n=-((I_n-J_n)/(np.linalg.norm(np.array(grad_B_n)@g)**2))@np.transpose((np.array(grad_B_n)@g))
+        u_n=-((I_n-J_n)/(np.linalg.norm(np.array(grad_B_n)@g)))@np.transpose((np.array(grad_B_n)@g))
     else:
         u_n=0
 
